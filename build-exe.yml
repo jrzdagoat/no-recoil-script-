@@ -1,0 +1,36 @@
+name: Build Windows EXE
+
+# Runs whenever you push to main, or you can trigger it manually
+# from the "Actions" tab in GitHub ("Run workflow" button).
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build the .exe
+        run: pyinstaller --onefile --windowed --name JRZMouseMover jrz_mouse_mover.py
+
+      # The built exe ends up in dist/JRZMouseMover.exe
+      - name: Upload the .exe as a build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: JRZMouseMover-windows
+          path: dist/JRZMouseMover.exe
